@@ -14,3 +14,5 @@ Build-derived SBOM and dependency graph for C++/CMake projects.
 ```bash
 cmake -S . -B build && cmake --build build
 depscope scan --build-dir build --out out/
+
+Licensed under the Apache-2.0 (or MIT) license. See LICENSE.

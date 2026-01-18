@@ -27,36 +27,43 @@ The initial MVP focuses on:
 When you run:
 
 ```bash
-depscope scan --build-dir build --out out/
+depscope scan --build-dir build --out out/ ```
 
 You will get:
 out/report.html
 out/sbom.cdx.json
 
-Quickstart (MVP)
+## Quickstart (MVP)
 
 1. Create a build directory (as you already do today)
 
+```bash
 cmake -S . -B build
-cmake --build build
+cmake --build build ```
 
 2. Run depscope
-depscope scan --build-dir build --out out/
+```bash
+depscope scan --build-dir build --out out/ ```
 
 3. Open the report
 
 # macOS
-open out/report.html
+```bash
+
+open out/report.html ```
 
 # Linux
-xdg-open out/report.html
+```bash
+xdg-open out/report.html ```
 
 # Windows (PowerShell)
-start out/report.html
+```bash
+start out/report.html ```
 
-Installation (dev)
+## Installation (dev)
 For now, the simplest dev install is:
 
+```bash
 python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
@@ -69,10 +76,10 @@ pip install -e .
 Then:
 
 depscope --help
-depscope scan --help
+depscope scan --help ```
 
 
-Roadmap
+## Roadmap
 
 Parse build graph from CMake
 
@@ -102,7 +109,7 @@ fail CI on forbidden duplicates
 
 fail CI on disallowed licenses/components
 
-Design partners
+## Design partners
 
 If you maintain a medium/large C++/CMake codebase and want to influence the MVP, please open an issue:
 
@@ -114,4 +121,5 @@ choose MVP Feedback
 
 Your real constraints (CI, OS, CMake version, size) are the fastest path to a useful tool.
 
+## License
 Licensed under the Apache License 2.0. See LICENSE.

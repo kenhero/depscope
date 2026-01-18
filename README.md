@@ -27,42 +27,37 @@ The initial MVP focuses on:
 When you run:
 
 ```bash
-depscope scan --build-dir build --out out/ ```
+depscope scan --build-dir build --out out/
 
 You will get:
 out/report.html
 out/sbom.cdx.json
 
-## Quickstart (MVP)
+Quickstart (MVP)
 
-1. Create a build directory (as you already do today)
-
+Create a build directory (as you already do today)
 ```bash
 cmake -S . -B build
-cmake --build build ```
+cmake --build build
 
-2. Run depscope
+Run depscope
 ```bash
-depscope scan --build-dir build --out out/ ```
+depscope scan --build-dir build --out out/
 
-3. Open the report
-
-# macOS
+Open the report
+macOS:
 ```bash
+open out/report.html
 
-open out/report.html ```
-
-# Linux
+Linux:
 ```bash
-xdg-open out/report.html ```
+xdg-open out/report.html
 
-# Windows (PowerShell)
+Windows (PowerShell):
 ```bash
-start out/report.html ```
+start out/report.html
 
-## Installation (dev)
-For now, the simplest dev install is:
-
+Installation (dev)
 ```bash
 python -m venv .venv
 # Linux/macOS
@@ -73,13 +68,12 @@ source .venv/bin/activate
 pip install -U pip
 pip install -e .
 
-Then:
-
+Verify:
+```bash
 depscope --help
-depscope scan --help ```
+depscope scan --help
 
-
-## Roadmap
+Roadmap
 
 Parse build graph from CMake
 
@@ -109,7 +103,7 @@ fail CI on forbidden duplicates
 
 fail CI on disallowed licenses/components
 
-## Design partners
+Design partners
 
 If you maintain a medium/large C++/CMake codebase and want to influence the MVP, please open an issue:
 
@@ -121,5 +115,3 @@ choose MVP Feedback
 
 Your real constraints (CI, OS, CMake version, size) are the fastest path to a useful tool.
 
-## License
-Licensed under the Apache License 2.0. See LICENSE.

@@ -107,5 +107,10 @@ If you maintain a medium/large C++/CMake codebase and want to influence the MVP,
 1) go to Issues  
 2) click New issue  
 3) choose MVP Feedback  
-4) share your constraints (CI, OS, CMake version, size)  
+4) share your constraints (CI, OS, CMake version, size)
+
+## License
+
+Licensed under the Apache License 2.0. See `LICENSE`.
+
 

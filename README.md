@@ -27,7 +27,7 @@ The initial MVP focuses on:
 When you run:
 
 ```bash
-depscope scan --build-dir build --out out/
+depscope scan --build-dir build --out out/```
 
 You will get:
 out/report.html
@@ -38,24 +38,24 @@ Quickstart (MVP)
 Create a build directory (as you already do today)
 ```bash
 cmake -S . -B build
-cmake --build build
+cmake --build build```
 
 Run depscope
 ```bash
-depscope scan --build-dir build --out out/
+depscope scan --build-dir build --out out/```
 
 Open the report
 macOS:
 ```bash
-open out/report.html
+open out/report.html```
 
 Linux:
 ```bash
-xdg-open out/report.html
+xdg-open out/report.html```
 
 Windows (PowerShell):
 ```bash
-start out/report.html
+start out/report.html```
 
 Installation (dev)
 ```bash
@@ -66,12 +66,12 @@ source .venv/bin/activate
 # .venv\Scripts\Activate.ps1
 
 pip install -U pip
-pip install -e .
+pip install -e .```
 
 Verify:
 ```bash
 depscope --help
-depscope scan --help
+depscope scan --help```
 
 Roadmap
 

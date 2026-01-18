@@ -27,37 +27,45 @@ The initial MVP focuses on:
 When you run:
 
 ```bash
-depscope scan --build-dir build --out out/```
+depscope scan --build-dir build --out out/
+```
 
 You will get:
+```text
 out/report.html
 out/sbom.cdx.json
+```
 
-Quickstart (MVP)
+## Quickstart (MVP)
 
 Create a build directory (as you already do today)
 ```bash
 cmake -S . -B build
-cmake --build build```
+cmake --build build
+```
 
 Run depscope
 ```bash
-depscope scan --build-dir build --out out/```
+depscope scan --build-dir build --out out/
+```
 
 Open the report
 macOS:
 ```bash
-open out/report.html```
+open out/report.html
+```
 
 Linux:
 ```bash
-xdg-open out/report.html```
+xdg-open out/report.html
+```
 
 Windows (PowerShell):
 ```bash
-start out/report.html```
+start out/report.html
+```
 
-Installation (dev)
+## Installation (dev)
 ```bash
 python -m venv .venv
 # Linux/macOS
@@ -66,52 +74,38 @@ source .venv/bin/activate
 # .venv\Scripts\Activate.ps1
 
 pip install -U pip
-pip install -e .```
+pip install -e .
+```
 
 Verify:
 ```bash
 depscope --help
-depscope scan --help```
+depscope scan --help
+```
 
-Roadmap
+## Roadmap
 
-Parse build graph from CMake
+1) Parse build graph from CMake  
+2) CMake File API (preferred)  
+3) Graphviz output (optional/secondary)  
+4) Generate HTML report from real graph  
+5) targets, transitive deps, origin paths  
+6) duplicates + drift detection with traces  
+7) Generate CycloneDX SBOM from real graph  
+8) components + dependencies  
+9) best-effort metadata (name/version/license when available)  
+10) GitHub Action example workflow  
+11) produces report.html + sbom.cdx.json as artifacts  
+12) Policy checks (CI gating)  
+13) fail CI on forbidden duplicates  
+14) fail CI on disallowed licenses/components  
 
-CMake File API (preferred)
-
-Graphviz output (optional/secondary)
-
-Generate HTML report from real graph
-
-targets, transitive deps, origin paths
-
-duplicates + drift detection with traces
-
-Generate CycloneDX SBOM from real graph
-
-components + dependencies
-
-best-effort metadata (name/version/license when available)
-
-GitHub Action example workflow
-
-produces report.html + sbom.cdx.json as artifacts
-
-Policy checks (CI gating)
-
-fail CI on forbidden duplicates
-
-fail CI on disallowed licenses/components
-
-Design partners
+## Design partners
 
 If you maintain a medium/large C++/CMake codebase and want to influence the MVP, please open an issue:
 
-go to Issues
-
-click New issue
-
-choose MVP Feedback
-
-Your real constraints (CI, OS, CMake version, size) are the fastest path to a useful tool.
+1) go to Issues  
+2) click New issue  
+3) choose MVP Feedback  
+4) share your constraints (CI, OS, CMake version, size)  
 

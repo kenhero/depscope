@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import json
-import os
 from pathlib import Path
-from typing import Any
 
-from .report_html import render_report_html
-from .sbom_cyclonedx import build_cyclonedx_sbom
+from .cmake_file_api import parse_build_graph
+from .report_html import write_report_html
+from .sbom_cyclonedx import write_sbom_cyclonedx
 
 
 def _log(verbose: bool, msg: str) -> None:
@@ -36,6 +34,8 @@ def _detect_cmake_file_api_reply(build_dir: Path) -> dict[str, Any] | None:
         return None
 
 
+
+
 def run_scan(build_dir: str, out_dir: str, project_name: str | None, verbose: bool) -> int:
     bdir = Path(build_dir).expanduser().resolve()
     odir = Path(out_dir).expanduser().resolve()
@@ -45,29 +45,26 @@ def run_scan(build_dir: str, out_dir: str, project_name: str | None, verbose: bo
         return 1
 
     odir.mkdir(parents=True, exist_ok=True)
-    _log(verbose, f"[depscope] build_dir={bdir}")
-    _log(verbose, f"[depscope] out_dir={odir}")
 
-    file_api = _detect_cmake_file_api_reply(bdir)
-    _log(verbose, f"[depscope] CMake File API detected: {bool(file_api)}")
+    if verbose:
+        print(f"[depscope] build_dir={bdir}")
+        print(f"[depscope] out_dir={odir}")
 
-    # Minimal "graph" placeholder for MVP
-    context: dict[str, Any] = {
-        "project": project_name or bdir.name,
-        "build_dir": str(bdir),
-        "file_api_present": bool(file_api),
-        "notes": [
-            "MVP placeholder outputs. Real graph parsing is coming next (CMake File API).",
-        ],
-    }
+    try:
+        graph = parse_build_graph(bdir)
+    except Exception as e:
+        print(f"ERROR: failed to parse CMake File API: {e}")
+        return 2
 
-    report_html = render_report_html(context)
-    (odir / "report.html").write_text(report_html, encoding="utf-8")
-    _log(verbose, f"[depscope] wrote {odir / 'report.html'}")
+    report_path = odir / "report.html"
+    sbom_path = odir / "sbom.cdx.json"
 
-    sbom = build_cyclonedx_sbom(context)
-    (odir / "sbom.cdx.json").write_text(json.dumps(sbom, indent=2), encoding="utf-8")
-    _log(verbose, f"[depscope] wrote {odir / 'sbom.cdx.json'}")
+    write_report_html(graph, report_path)
+    write_sbom_cyclonedx(graph, sbom_path)
 
-    print(f"OK: wrote {odir / 'report.html'} and {odir / 'sbom.cdx.json'}")
+    if verbose:
+        print(f"[depscope] wrote {report_path}")
+        print(f"[depscope] wrote {sbom_path}")
+
+    print(f"OK: wrote {report_path} and {sbom_path}")
     return 0

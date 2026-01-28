@@ -18,7 +18,8 @@ class TargetInfo:
 class BuildGraph:
     generator: Optional[str]
     build_dir: str
-    targets: List
+    targets: List[TargetInfo]
+    targets_by_id: Dict[str, TargetInfo]
 
 
 def _read_json(p: Path) -> dict:
@@ -114,8 +115,10 @@ def parse_build_graph(build_dir: Path) -> BuildGraph:
             dep_ids=dep_ids,
         ))
 
+    targets_by_id = {t.id: t for t in targets if t.id}
     return BuildGraph(
         generator=generator,
         build_dir=str(build_dir),
         targets=targets,
+        targets_by_id=targets_by_id,
     )

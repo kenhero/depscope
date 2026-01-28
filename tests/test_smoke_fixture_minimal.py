@@ -60,8 +60,13 @@ def test_smoke_fixture_minimal(tmp_path: Path) -> None:
 
     # JSON parseable
     data = json.loads(sbom.read_text(encoding="utf-8"))
-    assert data.get("bomFormat") == "CycloneDX"
+    assert data["bomFormat"] == "CycloneDX"
+    names = {c.get("name") for c in data.get("components", [])}
+    assert "hello" in names
+    assert "app" in names
     assert "components" in data
+    deps = data.get("dependencies", [])
+    assert any(str(d.get("ref", "")).startswith("target:") for d in deps)
 
     print("BUILD_DIR=", build_dir)
     print("OUT_DIR=", out_dir)

@@ -6,80 +6,82 @@ import uuid
 
 import json
 from pathlib import Path
-from .cmake_file_api import BuildGraph
+from .cmake_file_api import BuildGraph, TargetInfo
+
+def _cdx_type_for_target(t: TargetInfo) -> str:
+    tt = (t.type or "").upper()
+    if "EXECUTABLE" in tt:
+        return "application"
+    if "LIBRARY" in tt:
+        return "library"
+    return "library"
 
 
-def build_cyclonedx_sbom(context: dict[str, Any]) -> dict[str, Any]:
-    """
-    Minimal CycloneDX JSON BOM.
-    We keep it intentionally small but structurally valid:
-    - bomFormat/specVersion/version
-    - serialNumber (URN UUID)
-    - metadata: timestamp + tool + component (project)
-    - components/dependencies empty for now (MVP placeholder)
-    """
-    project = str(context.get("project", "unknown"))
-    timestamp = datetime.now(timezone.utc).isoformat()
+def _bomref_target(t: TargetInfo) -> str:
+    # preferisci id (univoco). fallback su name se serve.
+    if t.id:
+        return f"target:{t.id}"
+    return f"targetname:{t.name}"
 
-    return {
-        "bomFormat": "CycloneDX",
-        "specVersion": "1.5",
-        "version": 1,
-        "serialNumber": f"urn:uuid:{uuid.uuid4()}",
-        "metadata": {
-            "timestamp": timestamp,
-            "tools": [
-                {
-                    "vendor": "Depscope",
-                    "name": "depscope",
-                    "version": "0.0.1",
-                }
-            ],
-            "component": {
-                "type": "application",
-                "name": project,
-                "version": "0.0.0",
-            },
-        },
-        "components": [],
-        "dependencies": [],
-    }
 
 def write_sbom_cyclonedx(graph: BuildGraph, out_path: Path) -> None:
-    # MVP: 1 componente per ogni artifact prodotto dai target
-    components = []
-    deps = []
-
-    def ref_for(path: str) -> str:
-        return f"artifact:{path}"
-
-    # root component (progetto)
-    root_ref = "component:depscope-project"
+    # Root component (il "progetto")
+    project_name = Path(graph.build_dir).name
+    root_ref = "target:__root__"
     root = {
         "type": "application",
-        "name": "depscope-project",
+        "name": project_name,
         "bom-ref": root_ref,
+        "properties": [
+            {"name": "depscope.build_dir", "value": graph.build_dir},
+            {"name": "depscope.generator", "value": str(graph.generator or "")},
+        ],
     }
 
-    for t in graph.targets:
-        for a in t.artifacts:
-            comp = {
-                "type": "file",
-                "name": Path(a).name,
-                "bom-ref": ref_for(a),
-                "properties": [
-                    {"name": "depscope.path", "value": a},
-                    {"name": "depscope.target", "value": t.name},
-                    {"name": "depscope.targetType", "value": t.type},
-                ],
-            }
-            components.append(comp)
+    components: list[dict[str, Any]] = []
+    dependencies: list[dict[str, Any]] = []
 
-    # dependency graph: root dipende da tutti gli artifact (MVP)
-    deps.append({
-        "ref": root_ref,
-        "dependsOn": [c["bom-ref"] for c in components],
-    })
+    # Componenti = targets
+    for t in graph.targets:
+        comp = {
+            "type": _cdx_type_for_target(t),
+            "name": t.name,
+            "bom-ref": _bomref_target(t),
+            "properties": [
+                {"name": "depscope.targetId", "value": t.id},
+                {"name": "depscope.targetType", "value": t.type},
+            ],
+        }
+
+        # Artifacts come properties (MVP)
+        for a in (t.artifacts or []):
+            comp["properties"].append({"name": "depscope.artifact", "value": a})
+
+        components.append(comp)
+
+    # Dependencies: target -> target (risolvi dep_ids con targets_by_id)
+    for t in graph.targets:
+        depends_on: list[str] = []
+        for dep_id in (t.dep_ids or []):
+            dep_t = graph.targets_by_id.get(dep_id)
+            if dep_t:
+                depends_on.append(_bomref_target(dep_t))
+        if depends_on:
+            dependencies.append(
+                {
+                    "ref": _bomref_target(t),
+                    "dependsOn": depends_on,
+                }
+            )
+
+    # Root depends on all targets (MVP semplice e ok)
+    dependencies.insert(
+        0,
+        {
+            "ref": root_ref,
+            "dependsOn": [_bomref_target(t) for t in graph.targets],
+        },
+    )
 
     sbom = {
         "bomFormat": "CycloneDX",
@@ -90,7 +92,7 @@ def write_sbom_cyclonedx(graph: BuildGraph, out_path: Path) -> None:
             "tools": [{"vendor": "Depscope", "name": "depscope", "version": "0.0.1"}],
         },
         "components": components,
-        "dependencies": deps,
+        "dependencies": dependencies,
     }
 
     out_path.write_text(json.dumps(sbom, indent=2), encoding="utf-8")
